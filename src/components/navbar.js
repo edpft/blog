@@ -9,7 +9,6 @@ export default function NavBar() {
         site {
           siteMetadata {
             title
-            footer
           }
         }
       }

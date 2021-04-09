@@ -11,7 +11,6 @@ export default function Layout({ children }) {
         site {
           siteMetadata {
             title
-            footer
           }
         }
       }
