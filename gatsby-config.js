@@ -1,17 +1,32 @@
 module.exports = {
   siteMetadata: {
-    title: "blog",
+    title: "DevOops",
+    footer: "This is my footer",
   },
   plugins: [
     "gatsby-plugin-emotion",
-    "gatsby-plugin-mdx",
     {
-      resolve: "gatsby-source-filesystem",
+      resolve: "gatsby-plugin-mdx",
       options: {
-        name: "pages",
-        path: "./src/pages/",
+        defaultLayouts: {
+          default: require.resolve("./src/components/dashboard.js"),
+        },
       },
-      __key: "pages",
     },
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `pages`,
+        path: `${__dirname}/src/pages/`,
+      },
+    },
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `data`,
+        path: `${__dirname}/src/data/`,
+      },
+    },
+    `gatsby-transformer-json`,
   ],
 };
