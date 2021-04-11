@@ -5,19 +5,26 @@ import { PlotShare } from "./plot-share";
 
 export default function Plot(props) {
   const axisLookup = {
-    "Northern Ireland": "",
-    Scotland: 2,
-    Wales: 3,
-    England: 4,
-    "North East": 4,
-    "North West": 5,
-    "Yorks / Humber": 6,
-    "West Midlands": 7,
-    "East Midlands": 8,
-    Anglia: 9,
-    "South West": 10,
-    London: 11,
-    "South East": 12,
+    Country: {
+      "Northern Ireland": "",
+      Scotland: 2,
+      Wales: 3,
+      England: 4,
+    },
+    Region: {
+      "Northern Ireland": "",
+      Scotland: 2,
+      Wales: 3,
+      "North East": 4,
+      "North West": 5,
+      "Yorks / Humber": 6,
+      "West Midlands": 7,
+      "East Midlands": 8,
+      Anglia: 9,
+      "South West": 10,
+      London: 11,
+      "South East": 12,
+    },
   };
 
   const rowsLookup = {
@@ -38,7 +45,15 @@ export default function Plot(props) {
     return rows.map((row) => row[key]);
   }
 
-  function makeTrace(data, xValue, yValue, groups, index) {
+  function makeTrace(
+    data,
+    xValue,
+    yValue,
+    groups,
+    lookup,
+    geographyType,
+    index
+  ) {
     const dates = unpack(data, xValue);
     const values = unpack(data, yValue);
     const parties = unpack(data, groups);
@@ -60,8 +75,8 @@ export default function Plot(props) {
           ],
         },
       ],
-      xaxis: "x".concat(axisLookup[index]),
-      yaxis: "y".concat(axisLookup[index]),
+      xaxis: "x".concat(lookup[geographyType][index]),
+      yaxis: "y".concat(lookup[geographyType][index]),
       legendgroup: "one",
       showlegend: index === "Northern Ireland" ? true : false,
     };
@@ -69,24 +84,24 @@ export default function Plot(props) {
     return trace;
   }
 
-  function makeTraces(data, geographyType, measure) {
+  function makeData(data, geographyType, lookup, measure) {
     const filtered = filterData(data, geographyType, measure);
 
     const grouped = d3.group(filtered, (d) => d.Geography_Name);
 
     const traces = Array.from(grouped, ([key, values]) =>
-      makeTrace(values, "Date", "Value", "Party", key)
+      makeTrace(values, "Date", "Value", "Party", lookup, geographyType, key)
     );
 
     return traces;
   }
 
-  const data = makeTraces(Data, props.geographyType, props.measure);
+  const data = makeData(Data, props.geographyType, axisLookup, props.measure);
 
   function makeTitles(lookup, geographyType) {
     var titles = [];
 
-    for (const [key, value] of Object.entries(lookup)) {
+    for (const [key, value] of Object.entries(lookup[geographyType])) {
       titles.push({
         text: key,
         font: {
@@ -107,6 +122,69 @@ export default function Plot(props) {
 
   const titles = makeTitles(axisLookup, props.geographyType);
 
+  function makeAxes(param, number, value) {
+    var axesKeys = [];
+
+    var layoutAxes = [];
+
+    const numbers = [...Array(number).keys()];
+
+    numbers.forEach((number) =>
+      number === 0
+        ? axesKeys.push(param)
+        : axesKeys.push(param.concat(number + 1))
+    );
+
+    axesKeys.forEach((axesKey) => {
+      layoutAxes[axesKey] = value;
+    });
+
+    return layoutAxes;
+  }
+
+  const yaxesValue = {
+    range: [0, 1],
+    tickformat: "%",
+  };
+
+  const yaxesCountry = makeAxes("yaxis", 4, yaxesValue);
+
+  const yaxesRegion = makeAxes("yaxis", 12, yaxesValue);
+
+  const xaxesValue = {
+    showspikes: true,
+    spikecolor: "#999999",
+    spikemode: "across",
+  };
+
+  const xaxesCountry = makeAxes("xaxis", 4, xaxesValue);
+
+  const xaxesRegion = makeAxes("xaxis", 12, xaxesValue);
+
+  function makeLayout(geographyType, measure) {
+    if ((geographyType === "Country") & measure.includes("Share")) {
+      return {
+        ...yaxesCountry,
+        ...xaxesCountry,
+      };
+    } else if ((geographyType === "Country") & measure.endsWith("s")) {
+      return {
+        ...xaxesCountry,
+      };
+    } else if ((geographyType === "Region") & measure.includes("Share")) {
+      return {
+        ...yaxesRegion,
+        ...xaxesRegion,
+      };
+    } else if ((geographyType === "Region") & measure.endsWith("s")) {
+      return {
+        ...xaxesRegion,
+      };
+    }
+  }
+
+  const layoutAdditional = makeLayout(props.geographyType, props.measure);
+
   const layout = {
     grid: {
       rows: rowsLookup[props.geographyType],
@@ -114,6 +192,9 @@ export default function Plot(props) {
       pattern: "independent",
     },
     annotations: titles,
+    autosize: true,
+    height: props.geographyType === "Country" ? 600 : 1800,
+    ...layoutAdditional,
   };
 
   return <PlotShare data={data} layout={layout} />;

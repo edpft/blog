@@ -16,7 +16,7 @@ export default function PlotCountry() {
   const geographies = [
     { name: "Country", value: "Country" },
     { name: "Region", value: "Region" },
-    { name: "County", value: "County" },
+    // { name: "County", value: "County" },
     // { name: "Constituency", value: "Constituency" },
   ];
 
