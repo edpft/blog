@@ -24,10 +24,10 @@ export const PlotShare = ({ layout, style, config, ...rest }) => {
           color: `black`,
           size: 16,
         },
-        yaxis: {
-          range: [0, 1],
-          tickformat: "%",
-        },
+        // yaxis: {
+        //   range: [0, 1],
+        //   tickformat: "%",
+        // },
         autosize: true,
         ...layout,
       }}

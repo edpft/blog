@@ -8,31 +8,55 @@ import {
 } from "react-bootstrap";
 import Layout from "../components/layout";
 import PageTitle from "../components/page-title";
-import PlotSeatShare from "../components/plot-share-seat";
-import PlotVoteShare from "../components/plot-share-vote";
-import PlotSeats from "../components/plot-count-seat";
-import PlotVotes from "../components/plot-count-vote";
+import Plot from "../components/plot";
 
 export default function PlotCountry() {
-  const [measureValue, setMeasureValue] = useState("ss");
+  const [geographyValue, setGeographyValue] = useState("Country");
+
+  const geographies = [
+    { name: "Country", value: "Country" },
+    { name: "Region", value: "Region" },
+    { name: "County", value: "County" },
+    // { name: "Constituency", value: "Constituency" },
+  ];
+
+  const [measureValue, setMeasureValue] = useState("Seat_Share");
 
   const measures = [
-    { name: "Seat Share", value: "ss" },
-    { name: "Seats", value: "s" },
-    { name: "Vote Share", value: "vs" },
-    { name: "Votes", value: "v" },
+    { name: "Seat Share", value: "Seat_Share" },
+    { name: "Seats", value: "Seats" },
+    { name: "Vote Share", value: "Vote_Share" },
+    { name: "Votes", value: "Votes" },
   ];
 
   return (
     <Layout>
       <Container>
         <Row>
-          <PageTitle text="UK General Election Results by Country, 1955-2019"></PageTitle>
+          <PageTitle text="UK General Election Results, 1955-2019"></PageTitle>
         </Row>
       </Container>
       <br />
       <Container>
         <Row>
+          <Col>
+            <ButtonGroup toggle>
+              {geographies.map((geography, idx) => (
+                <ToggleButton
+                  key={idx}
+                  type="radio"
+                  variant="light"
+                  name
+                  const="geography"
+                  value={geography.value}
+                  checked={geographyValue === geography.value}
+                  onChange={(e) => setGeographyValue(e.currentTarget.value)}
+                >
+                  {geography.name}
+                </ToggleButton>
+              ))}
+            </ButtonGroup>
+          </Col>
           <Col>
             <ButtonGroup toggle>
               {measures.map((measure, idx) => (
@@ -54,14 +78,7 @@ export default function PlotCountry() {
         </Row>
         <br />
       </Container>
-      {
-        {
-          ss: <PlotSeatShare />,
-          s: <PlotSeats />,
-          vs: <PlotVoteShare />,
-          v: <PlotVotes />,
-        }[measureValue]
-      }
+      <Plot measure={measureValue} geographyType={geographyValue} />
     </Layout>
   );
 }
